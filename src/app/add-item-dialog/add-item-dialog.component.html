@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>Add item</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Item name</mat-label>
+    <input
+      matInput
+      [(ngModel)]="name"
+      placeholder="e.g. Tent, Drill, Winter jacket"
+    />
+  </mat-form-field>
+
+  <div class="photo-section">
+    <div class="photo-preview" *ngIf="photoPreviewUrl; else placeholder">
+      <img [src]="photoPreviewUrl" alt="Item photo" />
+    </div>
+    <ng-template #placeholder>
+      <div class="photo-placeholder">
+        <mat-icon>photo_camera</mat-icon>
+        <span>Tap to add photo</span>
+      </div>
+    </ng-template>
+
+    <button mat-stroked-button color="primary" type="button" (click)="triggerFilePicker()">
+      <mat-icon>photo_camera</mat-icon>
+      Take / Choose Photo
+    </button>
+
+    <input
+      #fileInput
+      type="file"
+      accept="image/*"
+      capture="environment"
+      hidden
+      (change)="onFileSelected($event)"
+    />
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">
+    <mat-icon>close</mat-icon>
+    Cancel
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    (click)="done()"
+    [disabled]="!name.trim() || !photoFile || saving"
+  >
+    <mat-icon>{{ saving ? 'hourglass_empty' : 'check' }}</mat-icon>
+    {{ saving ? 'Saving...' : 'Done' }}
+  </button>
+</mat-dialog-actions>

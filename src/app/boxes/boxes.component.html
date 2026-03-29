@@ -1,0 +1,62 @@
+<section class="boxes-page">
+  <header class="boxes-header">
+    <h1>STORAGE BOXES</h1>
+    <button mat-raised-button color="primary" (click)="addBox()">
+      <mat-icon>add</mat-icon>
+      Add box
+    </button>
+  </header>
+
+  <div class="search-row" *ngIf="!loading && boxes.length > 0">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search boxes and items</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        type="text"
+        [(ngModel)]="searchText"
+        placeholder="Type to search across all boxes and items"
+      />
+    </mat-form-field>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <p *ngIf="boxes.length === 0" class="empty">
+      No boxes yet. Click <strong>Add box</strong> to create one.
+    </p>
+
+    <p *ngIf="boxes.length > 0 && filteredBoxes.length === 0" class="empty">
+      No matches found.
+    </p>
+
+    <div class="boxes-list" *ngIf="filteredBoxes.length > 0">
+      <article class="box-row" *ngFor="let box of filteredBoxes">
+        <button class="box-row-header" type="button" (click)="openBox(box)">
+          <div class="box-name">{{ box.name }}</div>
+          <div class="box-meta">
+            Created {{ box.createdAt | date: 'short' }}
+          </div>
+        </button>
+
+        <div class="matched-items" *ngIf="hasSearchQuery && hasItemMatch(box.id)">
+          <p class="matched-items-title">Matching items</p>
+          <div class="matched-items-grid">
+            <button
+              class="matched-item"
+              type="button"
+              *ngFor="let item of getMatchingItemsForBox(box.id)"
+              (click)="openBox(box)"
+            >
+              <img [src]="getPhotoUrl(item)" [alt]="item.name" />
+              <span>{{ item.name }}</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </ng-container>
+</section>

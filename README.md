@@ -1,27 +1,48 @@
-# Ezfind
+# ezfind – Garage Storage Manager
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.11.
+A garage management app to organize storage boxes and their contents with photos.
 
-## Development server
+## Prerequisites
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- Node.js 16+ (20+ recommended for best compatibility)
+- MongoDB (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
 
-## Code scaffolding
+## Quick Start
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### 1. Start the API (backend)
 
-## Build
+```bash
+cd ezfind-api
+npm install
+npm run dev
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+The API runs at `http://localhost:3000`. Set `MONGODB_URI` if not using `mongodb://127.0.0.1:27017/ezfind`.
 
-## Running unit tests
+### 2. Start the Angular app (frontend)
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```bash
+cd ezfind
+npm install
+ng serve
+```
 
-## Running end-to-end tests
+Open `http://localhost:4200` in your browser.
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Project Structure
 
-## Further help
+- **ezfind/** – Angular frontend (boxes list, box detail, add dialogs, camera photo capture)
+- **ezfind-api/** – Node.js + Express backend (REST API, MongoDB, local file storage for photos)
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+## API Endpoints
+
+- `GET /api/boxes` – List boxes
+- `POST /api/boxes` – Create box `{ name }`
+- `GET /api/boxes/:boxId` – Get one box
+- `GET /api/boxes/:boxId/items` – List items in a box
+- `POST /api/boxes/:boxId/items` – Create item (multipart: `name`, `photo`)
+
+## Environment
+
+- **Frontend**: `src/environments/environment.ts` – `apiUrl` (default `http://localhost:3000`)
+- **Backend**: `MONGODB_URI`, `PORT`

@@ -1,0 +1,47 @@
+<section class="box-detail-page">
+  <header class="box-detail-header">
+    <div class="box-detail-header-left">
+      <button mat-icon-button (click)="goBack()" aria-label="Back to boxes">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>{{ boxName }}</h1>
+    </div>
+
+    <button
+      mat-stroked-button
+      color="warn"
+      type="button"
+      (click)="deleteCurrentBox()"
+      [disabled]="deleting"
+    >
+      <mat-icon>{{ deleting ? 'hourglass_empty' : 'delete' }}</mat-icon>
+      {{ deleting ? 'Deleting...' : 'Delete' }}
+    </button>
+  </header>
+
+  <div *ngIf="loading" class="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+  </div>
+
+  <div class="detail-actions" *ngIf="!loading">
+    <button mat-raised-button color="primary" (click)="addItem()">
+      <mat-icon>add</mat-icon>
+      Add
+    </button>
+  </div>
+
+  <p *ngIf="!loading && items.length === 0" class="empty">
+    No items yet. Click <strong>Add</strong> to create one.
+  </p>
+
+  <div class="items-grid" *ngIf="!loading && items.length > 0">
+    <mat-card class="item-card" *ngFor="let item of items">
+      <div class="photo-wrapper">
+        <img [src]="getPhotoUrl(item)" [alt]="item.name" />
+      </div>
+      <mat-card-content>
+        <h2>{{ item.name }}</h2>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</section>

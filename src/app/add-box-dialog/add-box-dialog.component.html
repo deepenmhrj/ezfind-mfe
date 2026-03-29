@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>Add storage box</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Box name</mat-label>
+    <input
+      matInput
+      [(ngModel)]="name"
+      placeholder="e.g. Camping gear, Winter clothes"
+    />
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">
+    <mat-icon>close</mat-icon>
+    Cancel
+  </button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="!name.trim() || saving">
+    <mat-icon>{{ saving ? 'hourglass_empty' : 'save' }}</mat-icon>
+    {{ saving ? 'Saving...' : 'Save' }}
+  </button>
+</mat-dialog-actions>
