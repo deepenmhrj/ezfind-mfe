@@ -1,17 +1,10 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist/ezfind-mfe",
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://ezfind-api-production.up.railway.app/api/:path*"
-    },
-    {
-      "source": "/uploads/:path*",
-      "destination": "https://ezfind-api-production.up.railway.app/uploads/:path*"
-    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

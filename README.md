@@ -32,7 +32,7 @@ Open `http://localhost:4200` in your browser.
 ## Project Structure
 
 - **ezfind/** – Angular frontend (boxes list, box detail, add dialogs, camera photo capture)
-- **ezfind-api/** – Node.js + Express backend (REST API, MongoDB, local file storage for photos)
+- **ezfind-api/** – Node.js + Express backend (REST API, MongoDB, Cloudinary-backed photo storage with local fallback in dev)
 
 ## API Endpoints
 
@@ -45,4 +45,13 @@ Open `http://localhost:4200` in your browser.
 ## Environment
 
 - **Frontend**: `src/environments/environment.ts` – `apiUrl` (default `http://localhost:3000`)
-- **Backend**: `MONGODB_URI`, `PORT`
+- **Backend**: `MONGODB_URI`, `PORT`, optional `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+
+## Vercel
+
+The Vercel build reads these optional environment variables:
+
+- `EZFIND_API_URL` – full backend base URL, for example `https://your-api.onrender.com`
+- `EZFIND_GOOGLE_CLIENT_ID` – Google OAuth client ID for production
+
+If `EZFIND_API_URL` is empty, the frontend falls back to same-origin requests in production.
