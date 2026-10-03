@@ -14,7 +14,8 @@
       <input
         matInput
         type="text"
-        [(ngModel)]="searchText"
+        [ngModel]="searchText"
+        (ngModelChange)="onSearchChange($event)"
         placeholder="Type to search across all boxes and items"
       />
     </mat-form-field>
@@ -34,7 +35,7 @@
     </p>
 
     <div class="boxes-list" *ngIf="filteredBoxes.length > 0">
-      <article class="box-row" *ngFor="let box of filteredBoxes">
+      <article class="box-row" *ngFor="let box of filteredBoxes; trackBy: trackById">
         <button class="box-row-header" type="button" (click)="openBox(box)">
           <div class="box-name">{{ box.name }}</div>
           <div class="box-meta">
@@ -42,13 +43,13 @@
           </div>
         </button>
 
-        <div class="matched-items" *ngIf="hasSearchQuery && hasItemMatch(box.id)">
+        <div class="matched-items" *ngIf="hasSearchQuery && matchingItemsByBoxId[box.id] as matches">
           <p class="matched-items-title">Matching items</p>
           <div class="matched-items-grid">
             <button
               class="matched-item"
               type="button"
-              *ngFor="let item of getMatchingItemsForBox(box.id)"
+              *ngFor="let item of matches"
               (click)="openBox(box)"
             >
               <img [src]="getPhotoUrl(item)" [alt]="item.name" />

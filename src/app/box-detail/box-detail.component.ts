@@ -6,7 +6,7 @@ import { Item } from '../shared-models';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import { BoxesService } from '../services/boxes.service';
 import { ItemsService } from '../services/items.service';
-import { getApiUrl } from '../api-url';
+import { resolvePhotoUrl } from '../api-url';
 
 @Component({
   selector: 'app-box-detail',
@@ -14,7 +14,6 @@ import { getApiUrl } from '../api-url';
   styleUrls: ['./box-detail.component.scss'],
 })
 export class BoxDetailComponent implements OnInit {
-  private readonly apiUrl = getApiUrl();
   boxId!: string;
   boxName = 'Box';
   items: Item[] = [];
@@ -62,10 +61,7 @@ export class BoxDetailComponent implements OnInit {
   }
 
   getPhotoUrl(item: Item): string {
-    if (item.photoUrl.startsWith('http') || item.photoUrl.startsWith('data:')) {
-      return item.photoUrl;
-    }
-    return `${this.apiUrl}${item.photoUrl}`;
+    return resolvePhotoUrl(item.photoUrl);
   }
 
   addItem(): void {

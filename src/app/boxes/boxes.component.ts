@@ -7,7 +7,7 @@ import { Box, Item } from '../shared-models';
 import { AddBoxDialogComponent } from '../add-box-dialog/add-box-dialog.component';
 import { BoxesService } from '../services/boxes.service';
 import { ItemsService } from '../services/items.service';
-import { getApiUrl } from '../api-url';
+import { resolvePhotoUrl } from '../api-url';
 
 @Component({
   selector: 'app-boxes',
@@ -15,11 +15,15 @@ import { getApiUrl } from '../api-url';
   styleUrls: ['./boxes.component.scss'],
 })
 export class BoxesComponent implements OnInit {
-  private readonly apiUrl = getApiUrl();
   boxes: Box[] = [];
-  itemsByBoxId: Record<string, Item[]> = {};
   searchText = '';
   loading = false;
+
+  // Derived from boxes/items/searchText; recomputed only when one of those changes.
+  filteredBoxes: Box[] = [];
+  matchingItemsByBoxId: Record<string, Item[]> = {};
+
+  private itemsByBoxId: Record<string, Item[]> = {};
 
   constructor(
     private router: Router,
@@ -35,10 +39,18 @@ export class BoxesComponent implements OnInit {
 
   loadBoxes(): void {
     this.loading = true;
-    this.boxesService.getBoxes().subscribe({
-      next: (boxes) => {
+    forkJoin({
+      boxes: this.boxesService.getBoxes(),
+      items: this.itemsService.getAllItems(),
+    }).subscribe({
+      next: ({ boxes, items }) => {
         this.boxes = boxes;
-        this.loadItemsForBoxes(boxes);
+        this.itemsByBoxId = {};
+        for (const item of items) {
+          (this.itemsByBoxId[item.boxId] ??= []).push(item);
+        }
+        this.applySearch();
+        this.loading = false;
       },
       error: () => {
         this.snackBar.open('Failed to load boxes', 'Close', { duration: 3000 });
@@ -47,41 +59,25 @@ export class BoxesComponent implements OnInit {
     });
   }
 
-  openBox(box: Box): void {
-    this.router.navigate(['/boxes', box.id]);
+  onSearchChange(value: string): void {
+    this.searchText = value;
+    this.applySearch();
   }
 
-  get filteredBoxes(): Box[] {
-    const query = this.normalizedQuery;
-    if (!query) {
-      return this.boxes;
-    }
+  trackById(_index: number, box: Box): string {
+    return box.id;
+  }
 
-    return this.boxes.filter((box) => {
-      if (box.name.toLowerCase().includes(query)) {
-        return true;
-      }
-      return this.getMatchingItems(box.id).length > 0;
-    });
+  openBox(box: Box): void {
+    this.router.navigate(['/boxes', box.id]);
   }
 
   get hasSearchQuery(): boolean {
     return Boolean(this.normalizedQuery);
   }
 
-  hasItemMatch(boxId: string): boolean {
-    return this.getMatchingItems(boxId).length > 0;
-  }
-
-  getMatchingItemsForBox(boxId: string): Item[] {
-    return this.getMatchingItems(boxId);
-  }
-
   getPhotoUrl(item: Item): string {
-    if (item.photoUrl.startsWith('http') || item.photoUrl.startsWith('data:')) {
-      return item.photoUrl;
-    }
-    return `${this.apiUrl}${item.photoUrl}`;
+    return resolvePhotoUrl(item.photoUrl);
   }
 
   addBox(): void {
@@ -97,42 +93,27 @@ export class BoxesComponent implements OnInit {
     });
   }
 
-  private loadItemsForBoxes(boxes: Box[]): void {
-    if (boxes.length === 0) {
-      this.itemsByBoxId = {};
-      this.loading = false;
-      return;
-    }
-
-    forkJoin(
-      boxes.map((box) => this.itemsService.getItems(box.id))
-    ).subscribe({
-      next: (itemGroups) => {
-        this.itemsByBoxId = {};
-        boxes.forEach((box, index) => {
-          this.itemsByBoxId[box.id] = itemGroups[index];
-        });
-        this.loading = false;
-      },
-      error: () => {
-        this.snackBar.open('Failed to load items', 'Close', { duration: 3000 });
-        this.itemsByBoxId = {};
-        this.loading = false;
-      },
-    });
-  }
-
   private get normalizedQuery(): string {
     return this.searchText.trim().toLowerCase();
   }
 
-  private getMatchingItems(boxId: string): Item[] {
+  private applySearch(): void {
     const query = this.normalizedQuery;
+    this.matchingItemsByBoxId = {};
+
     if (!query) {
-      return [];
+      this.filteredBoxes = this.boxes;
+      return;
     }
 
-    const items = this.itemsByBoxId[boxId] ?? [];
-    return items.filter((item) => item.name.toLowerCase().includes(query));
+    this.filteredBoxes = this.boxes.filter((box) => {
+      const matches = (this.itemsByBoxId[box.id] ?? []).filter((item) =>
+        item.name.toLowerCase().includes(query)
+      );
+      if (matches.length > 0) {
+        this.matchingItemsByBoxId[box.id] = matches;
+      }
+      return matches.length > 0 || box.name.toLowerCase().includes(query);
+    });
   }
 }

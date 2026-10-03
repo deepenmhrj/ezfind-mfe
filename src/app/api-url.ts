@@ -21,3 +21,10 @@ export function getApiUrl(): string {
 
   return '';
 }
+
+export function resolvePhotoUrl(photoUrl: string): string {
+  if (photoUrl.startsWith('http') || photoUrl.startsWith('data:')) {
+    return photoUrl;
+  }
+  return `${getApiUrl()}${photoUrl}`;
+}

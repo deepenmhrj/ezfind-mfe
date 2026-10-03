@@ -1,8 +1,9 @@
-import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Item } from '../shared-models';
 import { ItemsService } from '../services/items.service';
+import { downscaleImage } from '../image-resize';
 
 export interface AddItemDialogData {
   boxId: string;
@@ -13,7 +14,7 @@ export interface AddItemDialogData {
   templateUrl: './add-item-dialog.component.html',
   styleUrls: ['./add-item-dialog.component.scss'],
 })
-export class AddItemDialogComponent {
+export class AddItemDialogComponent implements OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   name = '';
@@ -40,24 +41,22 @@ export class AddItemDialogComponent {
     const file = input.files[0];
     this.photoFile = file;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.photoPreviewUrl = reader.result as string;
-    };
-    reader.readAsDataURL(file);
+    this.revokePreview();
+    this.photoPreviewUrl = URL.createObjectURL(file);
   }
 
-  done(): void {
+  async done(): Promise<void> {
     if (!this.name.trim() || !this.photoFile || this.saving) {
       return;
     }
     this.saving = true;
-    this.itemsService.createItem(this.data.boxId, this.name.trim(), this.photoFile).subscribe({
+    const photo = await downscaleImage(this.photoFile);
+    this.itemsService.createItem(this.data.boxId, this.name.trim(), photo).subscribe({
       next: (item) => {
         this.dialogRef.close(item);
       },
-      error: () => {
-        this.snackBar.open('Failed to add item', 'Close', { duration: 3000 });
+      error: (err) => {
+        this.snackBar.open(err?.error?.error ?? 'Failed to add item', 'Close', { duration: 3000 });
         this.saving = false;
       },
     });
@@ -65,5 +64,15 @@ export class AddItemDialogComponent {
 
   cancel(): void {
     this.dialogRef.close();
+  }
+
+  ngOnDestroy(): void {
+    this.revokePreview();
+  }
+
+  private revokePreview(): void {
+    if (this.photoPreviewUrl) {
+      URL.revokeObjectURL(this.photoPreviewUrl);
+    }
   }
 }

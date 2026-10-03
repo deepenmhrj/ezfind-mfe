@@ -7,8 +7,13 @@ import { getApiUrl } from '../api-url';
 @Injectable({ providedIn: 'root' })
 export class ItemsService {
   private baseUrl = `${getApiUrl()}/api/boxes`;
+  private allItemsUrl = `${getApiUrl()}/api/items`;
 
   constructor(private http: HttpClient) {}
+
+  getAllItems(): Observable<Item[]> {
+    return this.http.get<Item[]>(this.allItemsUrl);
+  }
 
   getItems(boxId: string): Observable<Item[]> {
     return this.http.get<Item[]>(`${this.baseUrl}/${boxId}/items`);
